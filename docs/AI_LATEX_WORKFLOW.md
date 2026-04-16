@@ -25,6 +25,18 @@ Use this repository as a general LaTeX compilation workspace backed by GitHub Ac
 7. Commit and push changes to trigger GitHub Actions.
 8. Check the latest GitHub Actions run and report success, failure, artifact name, and relevant logs.
 
+## Local writing mode
+
+Use local writing mode when the user wants the AI to draft or edit LaTeX in the workspace before pushing anything to GitHub.
+
+Standard flow:
+
+1. Create or reuse `incoming/<project-name>/`.
+2. Write or edit `main.tex` and all required companion files locally.
+3. Run `scripts/compile-latex-local.ps1 -EntryFile <path-to-main.tex>` if local compilation is requested.
+4. Report local compile results and remaining warnings.
+5. Push only if the user wants remote compilation, backup, or artifact generation from GitHub Actions.
+
 ## Naming rules
 
 - Use lowercase and hyphen-separated names for template folders.
@@ -43,6 +55,8 @@ Use this repository as a general LaTeX compilation workspace backed by GitHub Ac
 - Use `scripts/compile-latex-local.ps1 -EntryFile <path-to-main.tex>`.
 - Local compilation requires `tectonic.exe` in the repository root.
 - GitHub Actions remains the authoritative compile path for final verification.
+- Local compilation may leave `.aux`, `.bbl`, `.blg`, `.log`, and `.pdf` files inside the active project folder.
+- These local outputs are acceptable in `incoming/` when they help review, but should be managed intentionally before broad template reuse.
 
 ## Local helper scripts
 
@@ -66,7 +80,12 @@ Minimum useful permissions:
 
 - Read and write access to the repository workspace.
 - Permission to run local shell commands.
-- Network access to GitHub so the agent can inspect Actions runs and artifacts.
+- Network access to GitHub so the agent can inspect Actions runs and artifacts when needed.
+
+Needed for local writing only:
+
+- No GitHub authentication is required.
+- No push permission is required.
 
 Needed only when pushing changes:
 
