@@ -3,11 +3,35 @@ name: Build LaTeX PDFs
 on:
   push:
     paths:
-      - "LaTeXTemplate_ActaPhysicaSinica-main/**"
+      - "incoming/**/*.tex"
+      - "incoming/**/*.bib"
+      - "incoming/**/*.cls"
+      - "incoming/**/*.sty"
+      - "incoming/**/*.bst"
+      - "incoming/**/*.bbx"
+      - "incoming/**/*.cbx"
+      - "incoming/**/*.png"
+      - "incoming/**/*.jpg"
+      - "incoming/**/*.jpeg"
+      - "incoming/**/*.pdf"
+      - "incoming/**/*.svg"
+      - "incoming/**/*.eps"
       - ".github/workflows/latex.yml"
   pull_request:
     paths:
-      - "LaTeXTemplate_ActaPhysicaSinica-main/**"
+      - "incoming/**/*.tex"
+      - "incoming/**/*.bib"
+      - "incoming/**/*.cls"
+      - "incoming/**/*.sty"
+      - "incoming/**/*.bst"
+      - "incoming/**/*.bbx"
+      - "incoming/**/*.cbx"
+      - "incoming/**/*.png"
+      - "incoming/**/*.jpg"
+      - "incoming/**/*.jpeg"
+      - "incoming/**/*.pdf"
+      - "incoming/**/*.svg"
+      - "incoming/**/*.eps"
       - ".github/workflows/latex.yml"
   workflow_dispatch:
 
@@ -22,24 +46,37 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Verify template files exist
+      - name: Detect entry files
+        id: detect
         shell: bash
         run: |
-          test -f "LaTeXTemplate_ActaPhysicaSinica-main/template.tex"
-          test -f "LaTeXTemplate_ActaPhysicaSinica-main/acta_physica_sinica.sty"
-          test -f "LaTeXTemplate_ActaPhysicaSinica-main/acta_physica_sinica.bst"
+          mapfile -t files < <(find incoming -type f -name main.tex | sort)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No entry files were found. Add at least one incoming/<project>/main.tex."
+            exit 1
+          fi
+
+          {
+            echo "root_files<<EOF"
+            for file in "${files[@]}"; do
+              echo "${file#./}"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Detected entry files:"
+          printf ' - %s\n' "${files[@]#./}"
 
       - name: Compile LaTeX documents
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: template.tex
-          working_directory: LaTeXTemplate_ActaPhysicaSinica-main
+          root_file: ${{ steps.detect.outputs.root_files }}
           work_in_root_file_dir: true
           latexmk_use_xelatex: true
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4
         with:
-          name: acta-physica-sinica-pdf
-          path: LaTeXTemplate_ActaPhysicaSinica-main/template.pdf
+          name: latex-pdfs
+          path: incoming/**/*.pdf
           if-no-files-found: error

@@ -1,37 +1,34 @@
 # WsRe
 
-Physics writing workspace with a ready-to-run GitHub Actions pipeline for LaTeX.
+Physics writing workspace with a reusable GitHub Actions pipeline for LaTeX.
 
-## Included setup
+## Structure
 
-- Acta Physica Sinica LaTeX template in `LaTeXTemplate_ActaPhysicaSinica-main/`
-- GitHub Actions workflow in `.github/workflows/latex.yml`
-- Local helper scripts in `scripts/`
+- `incoming/`
+  Put active LaTeX jobs here. Each job should live in its own subdirectory and expose `main.tex`.
+- `templates/`
+  Store reusable templates here. Templates are not compiled automatically.
+- `docs/`
+  Contains the AI-readable operating guide.
+- `scripts/`
+  Local helper scripts for Git checks, local compilation, and template copying.
 
-## What the workflow does
+## Workflow behavior
 
 - Triggers on pushes, pull requests, or manual runs
-- Compiles `LaTeXTemplate_ActaPhysicaSinica-main/template.tex`
+- Detects every `incoming/**/main.tex`
 - Uses `latexmk + xelatex`
-- Uploads the generated PDF as the artifact `acta-physica-sinica-pdf`
+- Uploads generated PDFs as the artifact `latex-pdfs`
 
-## Repository structure
+## Typical usage
 
-```text
-.
-|-- .github/
-|   `-- workflows/
-|       `-- latex.yml
-|-- LaTeXTemplate_ActaPhysicaSinica-main/
-|   |-- template.tex
-|   |-- acta_physica_sinica.sty
-|   |-- acta_physica_sinica.bst
-|   |-- bibfile.bib
-|   `-- figures/
-`-- scripts/
-```
+1. Choose a template under `templates/`.
+2. Copy it into `incoming/<project-name>/`.
+3. Make sure the entry file is named `main.tex`.
+4. Commit and push.
+5. Download the compiled PDFs from GitHub Actions artifacts.
 
-## Local checks
+## Local helper commands
 
 Check Git status:
 
@@ -39,11 +36,23 @@ Check Git status:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-git-status.ps1
 ```
 
-Run a local smoke test if `tectonic.exe` exists in the repository root:
+Copy a template into a new incoming project:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\compile-template-local.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\new-latex-job.ps1 -Template acta-physica-sinica -Project demo-paper
 ```
+
+Run a local compile if `tectonic.exe` exists in the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\compile-latex-local.ps1 -EntryFile .\incoming\demo-paper\main.tex
+```
+
+## AI guide
+
+The machine-readable operating guide is here:
+
+- `docs/AI_LATEX_WORKFLOW.md`
 
 ## Notes
 

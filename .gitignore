@@ -27,3 +27,4 @@ tectonic.exe
 .tectonic/
 tools/mingit/
 tools/MinGit-*.zip
+incoming/**/*.pdf
